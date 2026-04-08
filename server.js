@@ -103,12 +103,12 @@ function initFallback() {
 async function seedAdmin() {
   const admin = await User.findOne({ role: 'admin' });
   if (!admin) {
+    const hashedPass = await bcrypt.hash('Isha@1234@', 10);
     await User.create({
-      name: 'Admin', email: 'admin@lencho.in',
-      password: await bcrypt.hash('admin123', 10), role: 'admin',
-      phone: process.env.ADMIN_PHONE || '9999999999', isVerified: true
+      name: 'Admin', email: 'Rupanshsini17@gmil.com',
+      password: hashedPass, role: 'admin', isVerified: true
     });
-    console.log('✅ Admin created: admin@lenchoindia.com / admin123');
+    console.log('✅ Admin created: Rupanshsini17@gmil.com / Isha@1234@');
   }
 }
 
@@ -302,14 +302,9 @@ app.post('/api/signup', async (req, res) => {
 
     if (useDB) {
       if (await User.findOne({ email })) return res.status(400).json({ error: 'Email already registered' });
-      // Verify OTP if provided
-      if (otpCode) {
-        const rec = await OTPLog.findOne({ target: email, code: otpCode, used: false });
-        if (!rec || rec.expiresAt < new Date()) return res.status(400).json({ error: 'Invalid or expired OTP. Please resend.' });
-        await OTPLog.findByIdAndUpdate(rec._id, { used: true });
-      }
+      // OTP Verification removed as requested
       const hashed = await bcrypt.hash(password, 10);
-      const user = await User.create({ name, email, password: hashed, phone: phone || '', gender: gender || 'female', isVerified: !!otpCode });
+      const user = await User.create({ name, email, password: hashed, phone: phone || '', gender: gender || 'female', isVerified: true });
       req.session.userId = user._id.toString(); req.session.role = user.role; req.session.name = user.name;
       const { password: _, ...safe } = user.toObject();
       return res.json({ success: true, user: { id: safe._id, ...safe } });

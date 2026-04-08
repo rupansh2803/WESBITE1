@@ -113,45 +113,19 @@ async function handleLogin() {
   if (r.user.role === 'admin') navigate('/admin');
 }
 
-async function sendSignupOTP(resend = false) {
-  const phone = document.getElementById('signup-phone')?.value?.trim();
-  const err = document.getElementById('signup-error');
-  if (!phone || phone.length < 10) { err.textContent = 'Please enter valid 10-digit mobile number first'; return; }
-  const btn = document.getElementById('send-otp-btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
-  const r = await api('/api/otp/send', { method: 'POST', body: { phone } });
-  if (btn) { btn.disabled = false; btn.textContent = resend ? '✓ Resent' : '✓ OTP Sent'; btn.style.color = 'var(--rose)'; }
-  if (r.error) { err.textContent = r.error; if (btn) { btn.disabled = false; btn.textContent = 'Send OTP'; } return; }
-  document.getElementById('otp-field').style.display = 'block';
-  toast(r.message, 'success');
-  // If in dev mode, show the SMS on screen as a helper
-  if (r.via === 'dev') {
-    setTimeout(() => {
-      alert(`[VIRTUAL SMS] Your Lencho verification code is: ${r.devOtp}. Enter this to verify.`);
-    }, 1000);
-  }
-}
-
 async function handleSignup() {
   const name = document.getElementById('signup-name')?.value?.trim();
   const phone = document.getElementById('signup-phone')?.value?.trim();
   const email = document.getElementById('signup-email')?.value?.trim();
   const gender = document.getElementById('signup-gender')?.value || 'female';
-  const otp = document.getElementById('signup-otp')?.value?.trim();
   const password = document.getElementById('signup-password')?.value;
   const confirm = document.getElementById('signup-confirm')?.value;
   const err = document.getElementById('signup-error');
   err.textContent = '';
-  if (!name) { err.textContent = 'Please enter your name'; return; }
-  if (!phone || phone.length < 10) { err.textContent = 'Please enter valid mobile number'; return; }
-  if (!email) { err.textContent = 'Please enter your email'; return; }
-  if (!password) { err.textContent = 'Please enter a password'; return; }
+  if (!name || !email || !password) { err.textContent = 'Name, Email and Password required'; return; }
   if (password.length < 6) { err.textContent = 'Password must be at least 6 characters'; return; }
   if (password !== confirm) { err.textContent = '❌ Passwords do not match!'; return; }
-  const btn = document.getElementById('signup-submit-btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Creating Account...'; }
-  const r = await api('/api/signup', { method: 'POST', body: { name, email, phone, gender, password, otpCode: otp } });
-  if (btn) { btn.disabled = false; btn.textContent = 'Create Account ✦'; }
+  const r = await api('/api/signup', { method: 'POST', body: { name, email, phone, gender, password } });
   if (r.error) { err.textContent = r.error; return; }
   currentUser = r.user;
   updateHeader();
@@ -306,13 +280,13 @@ async function renderHome() {
   <!-- HERO PREMIUM CENTERED -->
   <section class="hero-premium" style="background: url('/images/premium_hero.png') center/cover no-repeat; justify-content: center; text-align: center;">
     <div style="position:absolute; inset:0; background:rgba(0,0,0,0.55); z-index:1;"></div>
-    <div class="hero-p-centered reveal" style="position:relative; z-index:2;">
-      <div class="hero-badge" style="color:var(--gold-light);background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);padding:10px 24px;border-radius:99px;display:inline-block;margin-bottom:1.5rem;letter-spacing:.25em;font-size:.85rem;backdrop-filter:blur(5px);">ESTABLISHED 2026</div>
-      <h1 class="hero-p-title" style="margin-bottom:1.5rem;">Luxury Redefined<br/><span style="color:var(--gold-light); font-family:'Playfair Display',serif; font-style:italic;">Elite Craftsmanship</span></h1>
-      <p class="hero-p-sub" style="max-width:700px; color:rgba(255,255,255,0.9); font-size:1.2rem; line-height:1.7;">Indulge in the finest artificial jewellery curated for moments that matter. Zero tarnish, hypoallergenic, and timelessly elegant.</p>
-      <div class="hero-btns" style="margin-top:2.5rem; display:flex; justify-content:center; gap:1.5rem;">
-        <button class="btn-gold" style="padding:18px 45px; font-size:1.05rem; font-weight:700;" onclick="navigate('/products')">Explore Collection <i class="fas fa-gem"></i></button>
-        <button class="btn-outline" style="padding:18px 45px; font-size:1.05rem; color:#fff; border-color:#fff;" onclick="navigate('/products?category=best-sellers')">Best Sellers</button>
+    <div class="hero-p-centered reveal" style="position:relative; z-index:2; padding: 0 5%;">
+      <div class="hero-badge" style="color:var(--gold-light);background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);padding:10px 24px;border-radius:99px;display:inline-block;margin-bottom:1.5rem;letter-spacing:.25em;font-size:.85rem;backdrop-filter:blur(5px);">PREMIUM COLLECTION 2026</div>
+      <h1 class="hero-p-title" style="margin-bottom:1.5rem; font-size: clamp(3rem, 7vw, 5.5rem);">Eminence & Elegance<br/><span style="color:var(--gold-light); font-family:'Playfair Display',serif; font-style:italic;">Exquisite Luxury</span></h1>
+      <p class="hero-p-sub" style="max-width:800px; margin: 0 auto 2.5rem; color:rgba(255,255,255,0.95); font-size:1.3rem; line-height:1.7;">Indulge in the finest artificial jewellery curated for the modern connoisseur. Timeless designs, ethically crafted, and purely elite.</p>
+      <div class="hero-btns" style="display:flex; justify-content:center; gap:1.5rem;">
+        <button class="btn-gold" style="padding:20px 50px; font-size:1.1rem; font-weight:700;" onclick="navigate('/products')">Explore High Jewels <i class="fas fa-gem"></i></button>
+        <button class="btn-outline" style="padding:20px 50px; font-size:1.1rem; color:#fff; border-color:#fff;" onclick="navigate('/products?category=best-sellers')">Signature Pieces</button>
       </div>
     </div>
   </section>
