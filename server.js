@@ -101,14 +101,21 @@ function initFallback() {
 
 // ─── SEED DATA ────────────────────────────────────────────────
 async function seedAdmin() {
-  const admin = await User.findOne({ role: 'admin' });
-  if (!admin) {
-    const hashedPass = await bcrypt.hash('Isha@1234@', 10);
-    await User.create({
-      name: 'Admin', email: 'Rupanshsini17@gmil.com',
-      password: hashedPass, role: 'admin', isVerified: true
-    });
-    console.log('✅ Admin created: Rupanshsini17@gmil.com / Isha@1234@');
+  const email = 'Rupanshsini17@gmil.com';
+  const pass = 'Isha@1234@';
+  
+  if (useDB) {
+    let admin = await User.findOne({ role: 'admin' });
+    if (admin) {
+      admin.email = email;
+      admin.password = await bcrypt.hash(pass, 10);
+      await admin.save();
+      console.log(`✅ Admin credentials force-updated to: ${email}`);
+    } else {
+      const hashedPass = await bcrypt.hash(pass, 10);
+      await User.create({ name: 'Admin', email, password: hashedPass, role: 'admin', isVerified: true });
+      console.log(`✅ Admin created: ${email}`);
+    }
   }
 }
 
